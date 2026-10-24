@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ICU Imaging AI Atlas</title>
+<meta name="description" content="Searchable list of US FDA-authorised AI-enabled devices relevant to ICU imaging (CXR, CT, ultrasound/echo). Teaching and research only.">
+<style>
+  :root {
+    --bg: #F6F8FA; --surface: #FFFFFF; --ink: #1B1F24; --muted: #5B6470; --line: #E3E7EC;
+    --navy: #0B2545; --on-navy: #FFFFFF; --teal: #0F6E69; --teal-soft: #E3F2F0; --chip: #EEF2F6;
+    --warn-bg: #FFF7E6; --warn-ink: #7A4B00;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0D1117; --surface: #161B22; --ink: #E6EDF3; --muted: #9AA4AF; --line: #2A313A;
+      --navy: #12305A; --on-navy: #E6EDF3; --teal: #4FD1C5; --teal-soft: #11302E; --chip: #222A33;
+      --warn-bg: #2B2210; --warn-ink: #F2C46D;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0D1117; --surface: #161B22; --ink: #E6EDF3; --muted: #9AA4AF; --line: #2A313A;
+    --navy: #12305A; --on-navy: #E6EDF3; --teal: #4FD1C5; --teal-soft: #11302E; --chip: #222A33;
+    --warn-bg: #2B2210; --warn-ink: #F2C46D;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+  .notice { background: var(--warn-bg); color: var(--warn-ink); border-bottom: 1px solid var(--line);
+            padding: 10px 16px; font-weight: 600; text-align: center; }
+  header { background: var(--navy); color: var(--on-navy); padding: 24px 0 20px; }
+  h1 { margin: 0 0 4px; font-size: 26px; letter-spacing: -0.01em; }
+  header p { margin: 0; opacity: 0.9; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 20px 0; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .stat b { display: block; font-size: 26px; color: var(--teal); font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 13px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; background: var(--surface);
+             border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .filters label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); gap: 4px; flex: 1 1 160px; }
+  .filters input, .filters select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+                                    border-radius: 8px; padding: 8px 10px; min-width: 0; }
+  .filters button { font: inherit; border: 1px solid var(--line); background: var(--chip); color: var(--ink);
+                    border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+  #count { margin: 14px 2px 8px; color: var(--muted); }
+  .list { display: grid; gap: 10px; margin-bottom: 32px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .card h3 { margin: 0; font-size: 16px; overflow-wrap: anywhere; }
+  .meta { color: var(--muted); font-size: 13px; margin: 2px 0 8px; }
+  .meta a, footer a { color: var(--teal); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { background: var(--chip); border-radius: 999px; padding: 2px 10px; font-size: 12.5px; }
+  .chip.p { background: var(--teal-soft); }
+  details { margin-top: 8px; font-size: 13.5px; color: var(--muted); }
+  summary { cursor: pointer; color: var(--teal); }
+  footer { border-top: 1px solid var(--line); padding: 20px 0 32px; color: var(--muted); font-size: 13px; }
+  @media (max-width: 560px) { h1 { font-size: 21px; } .stat b { font-size: 22px; } }
+</style>
+</head>
+<body>
+<div class="notice">Teaching and research only — not a clinical device. FDA regulatory status only; this list does not cover CDSCO (India).</div>
+<header>
+  <div class="wrap">
+    <h1>ICU Imaging AI Atlas</h1>
+    <p>US FDA-authorised AI-enabled devices relevant to ICU imaging: chest X-ray, CT and ultrasound/echo.</p>
+  </div>
+</header>
+<main class="wrap">
+  <section class="stats" id="stats" aria-label="Summary counts"></section>
+  <section class="filters" aria-label="Filters">
+    <label>Search<input id="q" type="search" placeholder="Device, company, K-number, indication…"></label>
+    <label>Modality<select id="f-modality"></select></label>
+    <label>Task<select id="f-task"></select></label>
+    <label>ICU problem<select id="f-problem"></select></label>
+    <button id="reset" type="button">Reset</button>
+  </section>
+  <div id="count" aria-live="polite">Loading…</div>
+  <section class="list" id="list"></section>
+</main>
+<footer>
+  <div class="wrap">
+    <p>Source: <a href="https://www.fda.gov/medical-devices/artificial-intelligence-enabled-medical-devices/list-artificial-intelligence-enabled-medical-devices">US FDA, List of AI-Enabled Medical Devices</a> (page content current as of 4 September 2026; latest decision in the list 29 June 2026). Tags were assigned by keyword rules, then checked by hand against each device's 510(k)/De Novo summary. Tags can be wrong; read the FDA summary. Being on an FDA list is not evidence of benefit in your ICU.</p>
+    <p>Dr. Atul Tiwari · Vedant Research Labs · Code MIT, data CC BY 4.0 · <a href="https://github.com/atultiwari/icu-imaging-ai-atlas">GitHub</a> · <a href="data/icu_imaging_ai_atlas.csv">Download CSV</a></p>
+  </div>
+</footer>
+<script>
+const FIELDS = { modality: "f-modality", task: "f-task", icu_problem: "f-problem" };
+const TOTAL_FDA = "1,614";
+let rows = [];
+
+function parseCSV(text) {
+  const out = []; let row = [], cell = "", quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quoted) {
+      if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+      else if (c === '"') quoted = false;
+      else cell += c;
+    } else if (c === '"') quoted = true;
+    else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(cell); cell = ""; if (row.length > 1) out.push(row); row = [];
+    } else cell += c;
+  }
+  if (cell || row.length) { row.push(cell); out.push(row); }
+  const [head, ...body] = out;
+  return body.map(r => Object.fromEntries(head.map((h, i) => [h, r[i] || ""])));
+}
+
+const tags = v => v.split(";").map(s => s.trim()).filter(Boolean);
+const esc = s => s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function countBy(field) {
+  const m = new Map();
+  rows.forEach(r => tags(r[field]).forEach(t => m.set(t, (m.get(t) || 0) + 1)));
+  return [...m.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+function fillSelects() {
+  for (const [field, id] of Object.entries(FIELDS)) {
+    document.getElementById(id).innerHTML = `<option value="">All</option>` +
+      countBy(field).map(([t, n]) => `<option value="${esc(t)}">${esc(t)} (${n})</option>`).join("");
+  }
+}
+
+function renderStats() {
+  const mod = Object.fromEntries(countBy("modality"));
+  const cards = [[rows.length, "ICU-relevant devices"], [mod["CXR"] || 0, "Chest X-ray"], [mod["CT"] || 0, "CT"],
+                 [mod["ultrasound/echo"] || 0, "Ultrasound / echo"], [TOTAL_FDA, "All FDA AI devices"]];
+  document.getElementById("stats").innerHTML =
+    cards.map(([n, l]) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("");
+}
+
+function card(r) {
+  const problems = tags(r.icu_problem)
+    .map(t => `<span class="chip p">${esc(t === "other" && r.other_detail ? "other: " + r.other_detail : t)}</span>`).join("");
+  return `<article class="card">
+    <h3>${esc(r.device)}</h3>
+    <div class="meta">${esc(r.company)} · ${esc(r.decision_date)} ·
+      <a href="${esc(r.fda_database_url)}" target="_blank" rel="noopener">${esc(r.submission_number)}</a> · code ${esc(r.product_code)}</div>
+    <div class="chips"><span class="chip">${esc(r.modality)}</span>
+      ${tags(r.task).map(t => `<span class="chip">${esc(t)}</span>`).join("")}${problems}</div>
+    ${r.ifu_excerpt ? `<details><summary>Indications for use (excerpt)</summary><p>${esc(r.ifu_excerpt)}…</p></details>` : ""}
+  </article>`;
+}
+
+function render() {
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const sel = Object.fromEntries(Object.entries(FIELDS).map(([f, id]) => [f, document.getElementById(id).value]));
+  const hits = rows.filter(r =>
+    Object.entries(sel).every(([f, v]) => !v || tags(r[f]).includes(v)) &&
+    (!q || [r.device, r.company, r.submission_number, r.ifu_excerpt, r.other_detail, r.product_code]
+      .join(" ").toLowerCase().includes(q)));
+  document.getElementById("count").textContent = `${hits.length} of ${rows.length} devices`;
+  document.getElementById("list").innerHTML = hits.map(card).join("");
+}
+
+function reset() {
+  document.getElementById("q").value = "";
+  Object.values(FIELDS).forEach(id => { document.getElementById(id).value = ""; });
+  render();
+}
+
+fetch("data/icu_imaging_ai_atlas.csv")
+  .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
+  .then(text => {
+    rows = parseCSV(text);
+    fillSelects(); renderStats(); render();
+    ["q", ...Object.values(FIELDS)].forEach(id => document.getElementById(id).addEventListener("input", render));
+    document.getElementById("reset").addEventListener("click", reset);
+  })
+  .catch(err => { document.getElementById("count").textContent = "Could not load the data file (" + err.message + ")."; });
+</script>
+</body>
+</html>

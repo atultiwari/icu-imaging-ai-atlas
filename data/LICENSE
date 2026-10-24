@@ -1,0 +1,8 @@
+Data and figures in this repository (data/, deck/) are licensed under the
+Creative Commons Attribution 4.0 International licence (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/
+
+Attribution: Dr. Atul Tiwari · Vedant Research Labs, "ICU Imaging AI Atlas" (2026).
+
+The underlying FDA device list and 510(k)/De Novo summary text (data/raw/,
+ifu_excerpt columns) are US Government works in the public domain.

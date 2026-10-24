@@ -1,0 +1,34 @@
+{
+  "source": "US FDA, List of AI-Enabled Medical Devices",
+  "source_url": "https://www.fda.gov/medical-devices/artificial-intelligence-enabled-medical-devices/list-artificial-intelligence-enabled-medical-devices",
+  "list_as_of": "2026-09-04",
+  "latest_decision_date_in_list": "2026-06-29",
+  "total_fda_ai_devices": 1614,
+  "icu_relevant_tagged": 202,
+  "by_modality": {
+    "CT": 101,
+    "ultrasound/echo": 69,
+    "CXR": 32
+  },
+  "by_task": {
+    "detect/triage": 122,
+    "measure/quantify": 88,
+    "image quality": 13,
+    "guide acquisition": 11,
+    "report drafting": 5
+  },
+  "by_icu_problem": {
+    "LV function/EF": 61,
+    "ICH": 40,
+    "stroke/LVO": 39,
+    "other": 30,
+    "pneumothorax": 21,
+    "effusion/edema": 14,
+    "B-lines/lung US": 13,
+    "PE": 13,
+    "tube/line position": 5,
+    "VTI/cardiac output": 1
+  },
+  "note": "Task and ICU-problem counts sum to more than the device total because a device can carry several tags. FDA status only; does not cover CDSCO (India).",
+  "credit": "Dr. Atul Tiwari · Vedant Research Labs"
+}
